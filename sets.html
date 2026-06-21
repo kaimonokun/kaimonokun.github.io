@@ -186,6 +186,10 @@
     <script src="auth.js"></script>
     <script src="cart.js"></script>
     <script src="sets.js"></script>
-    <script>document.addEventListener("DOMContentLoaded", () => injectAuthBadge());</script>
+    <script>
+        // お客様画面はメートくんのログインが前提（未ログインはログイン画面へ）
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else document.addEventListener("DOMContentLoaded", () => injectStaffButton());
+    </script>
 </body>
 </html>

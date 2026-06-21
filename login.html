@@ -47,10 +47,7 @@
             const a = getAuth();
             if (a) {
                 if (a.role === "headquarters") location.replace("hq.html");
-                else if (a.role === "meito") {
-                    if (getAssignedRegion()) location.replace("meito.html");
-                    else location.replace("select-region.html");
-                }
+                else if (a.role === "meito") location.replace("meito.html");
                 return;
             }
 
@@ -73,20 +70,15 @@
                     pwEl.select();
                     return;
                 }
-                // ログイン成功 → role 別にリダイレクト
+                // ログイン成功 → 担当地区（本部がアカウントに指定）を自動セットしてから遷移
                 const u = result.user;
+                if (u.regions && u.regions.length > 0) {
+                    setAssignedRegion(u.regions[0]);
+                }
                 if (u.role === "headquarters") {
                     location.href = "hq.html";
-                } else if (u.role === "meito") {
-                    // 担当地区が1つだけなら自動選択、それ以上は地区選択画面
-                    if (u.regions && u.regions.length === 1) {
-                        setAssignedRegion(u.regions[0]);
-                        location.href = "meito.html";
-                    } else {
-                        location.href = "select-region.html";
-                    }
                 } else {
-                    location.href = "index.html";
+                    location.href = "meito.html";
                 }
             });
         });

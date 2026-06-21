@@ -116,10 +116,12 @@ function requireAuth(minRole) {
         return false;
     }
 
-    // メートくん／本部は地区が選ばれている必要がある（customerは不要）
-    if (need >= 1 && !getAssignedRegion() && location.pathname.indexOf("select-region.html") < 0) {
-        location.replace("select-region.html");
-        return false;
+    // メートくん／本部は担当地区が必要。
+    // 担当地区は本部がアカウントごとに固定指定（regions）。未設定なら自動でセットする。
+    if (need >= 1 && !getAssignedRegion()) {
+        if (a && a.regions && a.regions.length > 0) {
+            setAssignedRegion(a.regions[0]);
+        }
     }
 
     return true;
@@ -148,4 +150,30 @@ function injectAuthBadge() {
     document.getElementById("authBadgeLogout").addEventListener("click", () => {
         if (window.confirm("ログアウトしますか？")) logout();
     });
+}
+
+// ========================================
+// お客様画面用：隅に控えめな「スタッフ」ボタンを注入
+// ========================================
+// お客様にはログアウト等のバッジを見せない。
+// メートくんが自分の画面へ戻るための小さなボタンだけを置く（確認ダイアログ付き）。
+function injectStaffButton() {
+    if (document.getElementById("staffReturnBtn")) return;
+    const a = getAuth();
+    if (!a) return;
+    const btn = document.createElement("button");
+    btn.id = "staffReturnBtn";
+    btn.type = "button";
+    btn.textContent = "スタッフ";
+    // お客様が誤って押しにくいよう、右下に小さく・控えめに配置
+    btn.style.cssText =
+        "position:fixed;right:10px;bottom:10px;z-index:9998;" +
+        "padding:6px 12px;font-size:12px;color:#fff;" +
+        "background:rgba(70,70,70,0.55);border:none;border-radius:8px;opacity:0.65;";
+    btn.addEventListener("click", () => {
+        if (window.confirm("スタッフ画面に戻りますか？")) {
+            location.href = (a.role === "headquarters") ? "hq.html" : "meito.html";
+        }
+    });
+    document.body.appendChild(btn);
 }

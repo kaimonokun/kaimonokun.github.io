@@ -147,24 +147,28 @@
     <script src="auth.js"></script>
     <script src="cart.js"></script>
     <script>
-        // ウェルカム画面（同セッション中は初回のみ表示）
-        document.addEventListener("DOMContentLoaded", () => {
-            injectAuthBadge();
-            const welcome = document.getElementById("welcomeScreen");
-            const startBtn = document.getElementById("welcomeStartBtn");
+        // お客様画面はメートくんのログインが前提（未ログインはログイン画面へ）
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else {
+            // ウェルカム画面（同セッション中は初回のみ表示）
+            document.addEventListener("DOMContentLoaded", () => {
+                injectStaffButton();   // お客様向けバッジは出さず、隅にスタッフボタンのみ
+                const welcome = document.getElementById("welcomeScreen");
+                const startBtn = document.getElementById("welcomeStartBtn");
 
-            if (sessionStorage.getItem("buyimono_welcomed") === "yes") {
-                welcome.classList.add("hide");
-            } else {
-                const dismiss = (e) => {
-                    e && e.stopPropagation && e.stopPropagation();
-                    sessionStorage.setItem("buyimono_welcomed", "yes");
+                if (sessionStorage.getItem("buyimono_welcomed") === "yes") {
                     welcome.classList.add("hide");
-                };
-                welcome.addEventListener("click", dismiss);
-                startBtn.addEventListener("click", dismiss);
-            }
-        });
+                } else {
+                    const dismiss = (e) => {
+                        e && e.stopPropagation && e.stopPropagation();
+                        sessionStorage.setItem("buyimono_welcomed", "yes");
+                        welcome.classList.add("hide");
+                    };
+                    welcome.addEventListener("click", dismiss);
+                    startBtn.addEventListener("click", dismiss);
+                }
+            });
+        }
     </script>
 </body>
 </html>

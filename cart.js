@@ -529,8 +529,10 @@ function closeRegionSwitcher() {
 // ========================================
 function injectOrderElements() {
 
-    // 0. 地区インジケータ（右上）
-    injectRegionIndicator();
+    // 0. 地区インジケータ（右上）※地区変更は本部のみ（お客様・メートくんは固定）
+    if ((typeof getRole === "function" ? getRole() : "customer") === "headquarters") {
+        injectRegionIndicator();
+    }
 
     // ロール判定：customer は注文一覧/価格設定にアクセス不可
     const role = (typeof getRole === "function") ? getRole() : "customer";
@@ -1257,7 +1259,9 @@ function setupCartFab() {
 
     document.getElementById("completeBtn").addEventListener("click", () => {
         document.getElementById("completeModal").classList.remove("show");
-        if (typeof onCartClose === "function") onCartClose();
+        // 次のお客様のため「いらっしゃいませ」画面に戻す
+        sessionStorage.removeItem("buyimono_welcomed");
+        location.href = "index.html";
     });
 }
 
