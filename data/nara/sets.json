@@ -1,0 +1,83 @@
+[
+    {
+        "id": "curry",
+        "name": "カレーライス",
+        "emoji": "🍛",
+        "servings": "4人前",
+        "description": "定番のおうちカレー。家族みんなが喜ぶ味です。",
+        "ingredients": [
+            { "productId": 43, "qty": 1 },
+            { "productId": 2,  "qty": 1 },
+            { "productId": 3,  "qty": 1 },
+            { "productId": 1,  "qty": 2 },
+            { "productId": 10, "qty": 1 },
+            { "productId": 50, "qty": 1 }
+        ]
+    },
+    {
+        "id": "hamburger",
+        "name": "ハンバーグ",
+        "emoji": "🍔",
+        "servings": "2〜3人前",
+        "description": "ふわふわジューシーな手作りハンバーグ。",
+        "ingredients": [
+            { "productId": 12, "qty": 1 },
+            { "productId": 3,  "qty": 1 },
+            { "productId": 51, "qty": 1 },
+            { "productId": 60, "qty": 1 },
+            { "productId": 61, "qty": 1 }
+        ]
+    },
+    {
+        "id": "nikujaga",
+        "name": "肉じゃが",
+        "emoji": "🥘",
+        "servings": "3〜4人前",
+        "description": "やさしい味の定番家庭料理。",
+        "ingredients": [
+            { "productId": 10, "qty": 1 },
+            { "productId": 2,  "qty": 1 },
+            { "productId": 3,  "qty": 1 },
+            { "productId": 1,  "qty": 1 },
+            { "productId": 40, "qty": 1 }
+        ]
+    },
+    {
+        "id": "teishoku",
+        "name": "焼き魚定食",
+        "emoji": "🐟",
+        "servings": "2人前",
+        "description": "栄養たっぷりの和風定食セット。",
+        "ingredients": [
+            { "productId": 20, "qty": 1 },
+            { "productId": 43, "qty": 1 },
+            { "productId": 41, "qty": 1 },
+            { "productId": 63, "qty": 1 }
+        ]
+    },
+    {
+        "id": "salad",
+        "name": "野菜サラダ",
+        "emoji": "🥗",
+        "servings": "家族分",
+        "description": "新鮮野菜をたっぷり使ったサラダセット。",
+        "ingredients": [
+            { "productId": 4, "qty": 1 },
+            { "productId": 5, "qty": 1 },
+            { "productId": 6, "qty": 1 },
+            { "productId": 1, "qty": 1 }
+        ]
+    },
+    {
+        "id": "breakfast",
+        "name": "朝食セット",
+        "emoji": "🍞",
+        "servings": "数日分",
+        "description": "パン・牛乳・たまごの朝食定番セット。",
+        "ingredients": [
+            { "productId": 62, "qty": 1 },
+            { "productId": 60, "qty": 1 },
+            { "productId": 61, "qty": 1 }
+        ]
+    }
+]

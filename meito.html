@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メートくん画面 - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-body">
+
+    <header class="staff-header">
+        <div class="staff-header-inner">
+            <div class="staff-header-left">
+                <h1 class="staff-logo">買い物くん <span class="staff-logo-role">メートくん</span></h1>
+                <div class="staff-context" id="staffContext"></div>
+            </div>
+            <div class="staff-header-right">
+                <a href="select-region.html" class="staff-link-btn">📍 地区切替</a>
+                <button class="staff-link-btn staff-logout-btn" id="staffLogout">⎋ ログアウト</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="staff-main">
+        <h2 class="staff-section-title">本日の作業を選んでください</h2>
+
+        <div class="staff-menu-grid">
+            <a href="meito-shopping.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">📝</div>
+                <div class="staff-menu-card-title">買い出し指示書</div>
+                <div class="staff-menu-card-desc">
+                    本日のご注文を商品ごとにまとめて<br>
+                    買うべき品物・個数・グラム数を表示します
+                </div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+
+            <a href="meito-amounts.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">💴</div>
+                <div class="staff-menu-card-title">実際の金額入力</div>
+                <div class="staff-menu-card-desc">
+                    レシートを見ながら<br>
+                    実際の金額を1品ずつ入力します
+                </div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+
+            <a href="meito-delivery.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">🧾</div>
+                <div class="staff-menu-card-title">納品書生成</div>
+                <div class="staff-menu-card-desc">
+                    お客様番号ごとに納品書を<br>
+                    印刷できる形で表示します
+                </div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+
+            <a href="meito-report.html" class="staff-menu-card staff-menu-card-secondary">
+                <div class="staff-menu-card-icon">📧</div>
+                <div class="staff-menu-card-title">日報を本部へ送る</div>
+                <div class="staff-menu-card-desc">
+                    件数・メモを入力して<br>
+                    本部にメール送信します
+                </div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="staff-footer">
+        <span>買い物くん 業務用画面</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else {
+            document.addEventListener("DOMContentLoaded", async () => {
+                try { await dataReady; } catch { return; }
+                const auth = getAuth();
+                const region = getAssignedRegion();
+                document.getElementById("staffContext").innerHTML =
+                    `<span class="staff-ctx-user">${auth.name}</span>` +
+                    `<span class="staff-ctx-sep">・</span>` +
+                    `<span class="staff-ctx-region">📍 ${getRegionName(region)}</span>`;
+
+                document.getElementById("staffLogout").addEventListener("click", () => {
+                    if (window.confirm("ログアウトしますか？")) logout();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

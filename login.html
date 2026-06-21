@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+    <div class="login-wrap">
+        <div class="login-card">
+            <div class="login-logo">買い物くん</div>
+            <div class="login-sub">スタッフ・本部用ログイン</div>
+
+            <form id="loginForm" class="login-form" autocomplete="off">
+                <label class="login-field">
+                    <span class="login-field-label">ID</span>
+                    <input type="text" id="loginId" class="login-input"
+                           placeholder="例：meito1" autocomplete="username" required>
+                </label>
+                <label class="login-field">
+                    <span class="login-field-label">パスワード</span>
+                    <input type="password" id="loginPassword" class="login-input"
+                           placeholder="パスワード" autocomplete="current-password" required>
+                </label>
+
+                <div class="login-error" id="loginError" hidden></div>
+
+                <button type="submit" class="login-submit" id="loginSubmit">
+                    <span>🔑</span><span>ログイン</span>
+                </button>
+            </form>
+
+            <div class="login-customer-link">
+                <a href="index.html" class="login-customer-btn">
+                    <span>🛒</span><span>お客様画面に進む（ログイン不要）</span>
+                </a>
+            </div>
+
+            <div class="login-help">
+                <details>
+                    <summary>テスト用アカウント</summary>
+                    <ul>
+                        <li><b>meito1 / pass1</b> … メートくん（奈良・名古屋）</li>
+                        <li><b>meito_nara / nara123</b> … 奈良担当メートくん</li>
+                        <li><b>meito_nagoya / nagoya123</b> … 名古屋担当メートくん</li>
+                        <li><b>honbu / honbu2026</b> … 本部スタッフ</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // 既にログイン済みなら role に応じてリダイレクト
+        document.addEventListener("DOMContentLoaded", () => {
+            const a = getAuth();
+            if (a) {
+                if (a.role === "headquarters") location.replace("hq.html");
+                else if (a.role === "meito") {
+                    if (getAssignedRegion()) location.replace("meito.html");
+                    else location.replace("select-region.html");
+                }
+                return;
+            }
+
+            const form = document.getElementById("loginForm");
+            const errEl = document.getElementById("loginError");
+            const idEl = document.getElementById("loginId");
+            const pwEl = document.getElementById("loginPassword");
+            const btn = document.getElementById("loginSubmit");
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                errEl.hidden = true;
+                btn.disabled = true;
+                const result = await attemptLogin(idEl.value.trim(), pwEl.value);
+                btn.disabled = false;
+                if (!result.ok) {
+                    errEl.textContent = result.message;
+                    errEl.hidden = false;
+                    pwEl.focus();
+                    pwEl.select();
+                    return;
+                }
+                // ログイン成功 → role 別にリダイレクト
+                const u = result.user;
+                if (u.role === "headquarters") {
+                    location.href = "hq.html";
+                } else if (u.role === "meito") {
+                    // 担当地区が1つだけなら自動選択、それ以上は地区選択画面
+                    if (u.regions && u.regions.length === 1) {
+                        setAssignedRegion(u.regions[0]);
+                        location.href = "meito.html";
+                    } else {
+                        location.href = "select-region.html";
+                    }
+                } else {
+                    location.href = "index.html";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

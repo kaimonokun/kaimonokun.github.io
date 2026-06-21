@@ -1,0 +1,9 @@
+[
+    { "id": "all",       "name": "すべて" },
+    { "id": "vegetable", "name": "野菜" },
+    { "id": "meat",      "name": "お肉" },
+    { "id": "fish",      "name": "お魚" },
+    { "id": "other",     "name": "乳・たまご" },
+    { "id": "daily",     "name": "日用品" },
+    { "id": "seasoning", "name": "調味料" }
+]

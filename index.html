@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="menu-body">
+    <!-- ウェルカム画面（セッション中、初回のみ表示） -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-bg">
+            <span class="welcome-bg-shape welcome-bg-shape-1"></span>
+            <span class="welcome-bg-shape welcome-bg-shape-2"></span>
+            <span class="welcome-bg-shape welcome-bg-shape-3"></span>
+        </div>
+        <div class="welcome-content">
+            <div class="welcome-logo">買い物くん</div>
+            <div class="welcome-greeting">
+                <span class="welcome-greeting-text">いらっしゃいませ</span>
+            </div>
+            <div class="welcome-sub">ようこそ、買い物くんへ</div>
+
+            <div class="welcome-illustration">
+                <span class="welcome-emoji welcome-emoji-1">🥕</span>
+                <span class="welcome-emoji welcome-emoji-2">🍎</span>
+                <span class="welcome-emoji welcome-emoji-3">🥬</span>
+                <span class="welcome-emoji welcome-emoji-4">🍞</span>
+                <span class="welcome-emoji welcome-emoji-5">🐟</span>
+            </div>
+
+            <button class="welcome-start-btn" id="welcomeStartBtn">
+                <span class="welcome-start-icon">👆</span>
+                <span>画面にふれて お買い物を はじめる</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-inner">
+            <h1 class="logo">買い物くん</h1>
+            <p class="tagline">お買い物の方法を選んでください</p>
+        </div>
+    </header>
+
+    <!-- メニュー -->
+    <main class="menu-main">
+        <h2 class="menu-title">お買い物 メニュー</h2>
+        <p class="menu-lead">お好きな方法でお買い物ができます</p>
+
+        <div class="menu-grid">
+            <a href="single.html" class="menu-card menu-card-single">
+                <div class="menu-card-icon">🛒</div>
+                <div class="menu-card-title">1つずつ 選ぶ</div>
+                <div class="menu-card-desc">
+                    動画で商品を見ながら<br>
+                    好きなものを 1つずつ選べます
+                </div>
+                <div class="menu-card-arrow">▶</div>
+            </a>
+
+            <a href="sets.html" class="menu-card menu-card-set">
+                <div class="menu-card-icon">🍛</div>
+                <div class="menu-card-title">お料理の セットから選ぶ</div>
+                <div class="menu-card-desc">
+                    カレー・ハンバーグなど<br>
+                    お料理ごとに まとめて材料が揃います
+                </div>
+                <div class="menu-card-arrow">▶</div>
+            </a>
+        </div>
+    </main>
+
+    <!-- カートFAB -->
+    <button class="cart-fab" id="cartFab">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-label">買い物かご</span>
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
+
+    <!-- 買い物かごモーダル -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content cart-modal-content">
+            <button class="modal-close" id="cartModalClose">×</button>
+            <h3 class="modal-title">買い物かごの中身</h3>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-total">
+                <span>合計</span>
+                <span class="total-price" id="totalPrice">0円</span>
+            </div>
+            <button class="order-btn" id="orderBtn">この内容で注文する</button>
+        </div>
+    </div>
+
+    <!-- 最終注文確認モーダル -->
+    <div class="modal" id="orderConfirmModal">
+        <div class="modal-content order-confirm-content">
+            <button class="modal-close" id="orderConfirmClose">×</button>
+            <div class="order-confirm-icon">📝</div>
+            <h3 class="order-confirm-title">ご注文内容の最終確認</h3>
+            <p class="order-confirm-lead">以下の内容でご注文を確定します。<br>よろしいですか？</p>
+            <div class="order-confirm-list" id="orderConfirmList"></div>
+            <div class="order-confirm-total">
+                <span>お支払い合計</span>
+                <span class="order-confirm-total-price" id="orderConfirmTotal">0円</span>
+            </div>
+            <div class="order-confirm-note">
+                <span class="order-confirm-note-icon">ℹ</span>
+                <span>ご注文後、スタッフが商品をお届けします。</span>
+            </div>
+            <div class="order-confirm-actions">
+                <button class="order-confirm-btn order-confirm-btn-back" id="orderConfirmBack">
+                    <span class="panel-btn-icon">←</span>
+                    <span>買い物かごに戻る</span>
+                </button>
+                <button class="order-confirm-btn order-confirm-btn-ok" id="orderConfirmOk">
+                    <span class="panel-btn-icon">✓</span>
+                    <span>この内容で注文する</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注文完了モーダル -->
+    <div class="modal" id="completeModal">
+        <div class="modal-content complete-content">
+            <div class="complete-icon">✓</div>
+            <h3 class="complete-title">ご注文ありがとうございます</h3>
+            <p class="complete-text">
+                スタッフが商品をお届けします。<br>
+                しばらくお待ちください。
+            </p>
+            <div class="complete-summary" id="completeSummary"></div>
+            <button class="complete-btn" id="completeBtn">とじる</button>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>お問い合わせ：買い物くん本部</p>
+        <p>TEL: 090-5068-4091</p>
+        <p class="footer-small">発案者：金子 幸一</p>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="cart.js"></script>
+    <script>
+        // ウェルカム画面（同セッション中は初回のみ表示）
+        document.addEventListener("DOMContentLoaded", () => {
+            injectAuthBadge();
+            const welcome = document.getElementById("welcomeScreen");
+            const startBtn = document.getElementById("welcomeStartBtn");
+
+            if (sessionStorage.getItem("buyimono_welcomed") === "yes") {
+                welcome.classList.add("hide");
+            } else {
+                const dismiss = (e) => {
+                    e && e.stopPropagation && e.stopPropagation();
+                    sessionStorage.setItem("buyimono_welcomed", "yes");
+                    welcome.classList.add("hide");
+                };
+                welcome.addEventListener("click", dismiss);
+                startBtn.addEventListener("click", dismiss);
+            }
+        });
+    </script>
+</body>
+</html>

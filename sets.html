@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>セットで選ぶ - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="sets-body">
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-inner header-with-back">
+            <a href="index.html" class="header-back">← メニュー</a>
+            <div>
+                <h1 class="logo">買い物くん</h1>
+                <p class="tagline">お料理のセットから選ぶ</p>
+            </div>
+            <span class="header-back-spacer"></span>
+        </div>
+    </header>
+
+    <!-- メイン -->
+    <main class="sets-main">
+        <h2 class="sets-title">お料理を選んでください</h2>
+        <p class="sets-lead">必要な材料が すべて揃います。<br>中身は自由に 足したり 減らしたりできます。</p>
+
+        <div class="sets-grid" id="setsGrid"></div>
+    </main>
+
+    <!-- セット詳細モーダル -->
+    <div class="modal" id="setDetailModal">
+        <div class="modal-content set-detail-content">
+            <button class="modal-close" id="setDetailClose">×</button>
+
+            <div class="set-detail-header">
+                <div class="set-detail-emoji" id="setDetailEmoji"></div>
+                <div class="set-detail-heading">
+                    <h3 class="set-detail-title" id="setDetailTitle"></h3>
+                    <div class="set-detail-meta">
+                        <span class="set-detail-servings" id="setDetailServings"></span>
+                    </div>
+                </div>
+            </div>
+            <p class="set-detail-desc" id="setDetailDesc"></p>
+
+            <div class="set-ingredients-head">
+                <span>お買い物リスト</span>
+                <span class="set-ingredients-hint">ー＋ で数を変えられます</span>
+            </div>
+
+            <div class="set-ingredients" id="setIngredients"></div>
+
+            <button class="set-add-product-btn" id="setAddProductBtn">
+                <span class="plus-icon">＋</span>
+                <span>他の商品を追加する</span>
+            </button>
+
+            <div class="set-total-row">
+                <span>お買い物リスト 合計</span>
+                <span class="set-total-price" id="setTotalPrice">0円</span>
+            </div>
+
+            <button class="set-add-to-cart-btn" id="setAddToCartBtn">
+                <span class="panel-btn-icon">🛒</span>
+                <span>すべて 買い物かごに入れる</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 商品追加モーダル -->
+    <div class="modal" id="productPickerModal">
+        <div class="modal-content product-picker-content">
+            <button class="modal-close" id="productPickerClose">×</button>
+            <h3 class="modal-title">追加する商品を選んでください</h3>
+
+            <div class="picker-category-tabs" id="pickerCategoryTabs">
+                <button class="picker-cat-btn active" data-category="all">すべて</button>
+                <button class="picker-cat-btn" data-category="vegetable">野菜</button>
+                <button class="picker-cat-btn" data-category="meat">お肉</button>
+                <button class="picker-cat-btn" data-category="fish">お魚</button>
+                <button class="picker-cat-btn" data-category="other">乳・たまご</button>
+                <button class="picker-cat-btn" data-category="daily">日用品</button>
+                <button class="picker-cat-btn" data-category="seasoning">調味料</button>
+            </div>
+
+            <div class="picker-list" id="pickerList"></div>
+        </div>
+    </div>
+
+    <!-- セット追加確認ダイアログ -->
+    <div class="modal" id="setConfirmModal">
+        <div class="modal-content set-confirm-content">
+            <button class="modal-close" id="setConfirmClose">×</button>
+            <div class="order-confirm-icon">🛒</div>
+            <h3 class="order-confirm-title">以下の商品を<br>買い物かごに入れますか？</h3>
+            <div class="order-confirm-list" id="setConfirmList"></div>
+            <div class="order-confirm-total">
+                <span>合計</span>
+                <span class="order-confirm-total-price" id="setConfirmTotal">0円</span>
+            </div>
+            <div class="order-confirm-actions">
+                <button class="order-confirm-btn order-confirm-btn-back" id="setConfirmBack">
+                    <span class="panel-btn-icon">←</span>
+                    <span>やめる</span>
+                </button>
+                <button class="order-confirm-btn order-confirm-btn-ok" id="setConfirmOk">
+                    <span class="panel-btn-icon">🛒</span>
+                    <span>はい、入れます</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- カートFAB -->
+    <button class="cart-fab" id="cartFab">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-label">買い物かご</span>
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
+
+    <!-- 買い物かごモーダル -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content cart-modal-content">
+            <button class="modal-close" id="cartModalClose">×</button>
+            <h3 class="modal-title">買い物かごの中身</h3>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-total">
+                <span>合計</span>
+                <span class="total-price" id="totalPrice">0円</span>
+            </div>
+            <button class="order-btn" id="orderBtn">この内容で注文する</button>
+        </div>
+    </div>
+
+    <!-- 最終注文確認モーダル -->
+    <div class="modal" id="orderConfirmModal">
+        <div class="modal-content order-confirm-content">
+            <button class="modal-close" id="orderConfirmClose">×</button>
+            <div class="order-confirm-icon">📝</div>
+            <h3 class="order-confirm-title">ご注文内容の最終確認</h3>
+            <p class="order-confirm-lead">以下の内容でご注文を確定します。<br>よろしいですか？</p>
+            <div class="order-confirm-list" id="orderConfirmList"></div>
+            <div class="order-confirm-total">
+                <span>お支払い合計</span>
+                <span class="order-confirm-total-price" id="orderConfirmTotal">0円</span>
+            </div>
+            <div class="order-confirm-note">
+                <span class="order-confirm-note-icon">ℹ</span>
+                <span>ご注文後、スタッフが商品をお届けします。</span>
+            </div>
+            <div class="order-confirm-actions">
+                <button class="order-confirm-btn order-confirm-btn-back" id="orderConfirmBack">
+                    <span class="panel-btn-icon">←</span>
+                    <span>買い物かごに戻る</span>
+                </button>
+                <button class="order-confirm-btn order-confirm-btn-ok" id="orderConfirmOk">
+                    <span class="panel-btn-icon">✓</span>
+                    <span>この内容で注文する</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注文完了モーダル -->
+    <div class="modal" id="completeModal">
+        <div class="modal-content complete-content">
+            <div class="complete-icon">✓</div>
+            <h3 class="complete-title">ご注文ありがとうございます</h3>
+            <p class="complete-text">
+                スタッフが商品をお届けします。<br>
+                しばらくお待ちください。
+            </p>
+            <div class="complete-summary" id="completeSummary"></div>
+            <button class="complete-btn" id="completeBtn">とじる</button>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <p>お問い合わせ：買い物くん本部</p>
+        <p>TEL: 090-5068-4091</p>
+        <p class="footer-small">発案者：金子 幸一</p>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="cart.js"></script>
+    <script src="sets.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => injectAuthBadge());</script>
+</body>
+</html>

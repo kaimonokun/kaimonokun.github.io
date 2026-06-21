@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>実際の金額入力 - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-body">
+
+    <div id="staffHeaderMount"></div>
+
+    <main class="staff-main staff-doc">
+        <div class="staff-doc-titlebar">
+            <h2 class="staff-doc-title">💴 実際の金額入力</h2>
+            <div class="staff-doc-meta" id="docMeta"></div>
+        </div>
+
+        <p class="staff-doc-lead">
+            レシートを見ながら、各品物の<b>実際の金額</b>を入力します。<br>
+            入力した瞬間に保存されます。
+        </p>
+
+        <div class="staff-doc-empty" id="emptyView" hidden>
+            <div class="staff-doc-empty-icon">📋</div>
+            <div>本日まだ注文が入っていません</div>
+        </div>
+
+        <div class="amounts-orders" id="amountsOrders"></div>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="meito-common.js"></script>
+    <script>
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else {
+            document.addEventListener("DOMContentLoaded", async () => {
+                try { await dataReady; } catch { return; }
+                document.getElementById("staffHeaderMount").innerHTML =
+                    meitoRenderHeader("実際の金額入力");
+                document.getElementById("docMeta").innerHTML =
+                    `<span>📅 ${meitoFormatToday()}</span>` +
+                    `<span class="staff-doc-meta-sep">・</span>` +
+                    `<span>📍 ${getRegionName(getCurrentRegion())}</span>`;
+                renderAmounts();
+            });
+        }
+
+        function renderAmounts() {
+            const orders = meitoLoadOrders();
+            const container = document.getElementById("amountsOrders");
+            const emptyView = document.getElementById("emptyView");
+
+            if (orders.length === 0) {
+                emptyView.hidden = false;
+                container.innerHTML = "";
+                return;
+            }
+            emptyView.hidden = true;
+
+            container.innerHTML = orders.map(order => {
+                const orderTotal = meitoGetOrderTotal(order);
+                const estTotal   = order.items.reduce((s, it) => s + it.price * it.qty, 0);
+                const anyAdj     = order.items.some(meitoIsAdjusted);
+
+                return `
+                    <section class="amounts-order">
+                        <header class="amounts-order-head">
+                            <span class="amounts-order-num">${order.number}番</span>
+                            <span class="amounts-order-time">${meitoFormatDate(order)}</span>
+                            <span class="amounts-order-total">
+                                ${anyAdj ? `<span class="amounts-order-est">調整前 ${estTotal.toLocaleString()}円</span>` : ""}
+                                <span class="amounts-order-total-val">${orderTotal.toLocaleString()}円</span>
+                            </span>
+                        </header>
+                        <div class="amounts-lines">
+                            ${order.items.map(item => renderAmountLine(order.number, item)).join("")}
+                        </div>
+                    </section>
+                `;
+            }).join("");
+
+            wireAmountEvents();
+        }
+
+        function renderAmountLine(orderNumber, item) {
+            const est = item.price * item.qty;
+            const act = meitoGetItemTotal(item);
+            const adj = meitoIsAdjusted(item);
+            const diff = act - est;
+            return `
+                <div class="amount-line ${adj ? 'amount-line-adjusted' : ''}">
+                    <div class="amount-line-emoji">${item.emoji}</div>
+                    <div class="amount-line-info">
+                        <div class="amount-line-name">
+                            ${item.byWeight ? '<span class="bw-badge">量り売り</span>' : ''}
+                            ${meitoEscapeHtml(item.name)} × ${item.qty}
+                        </div>
+                        <div class="amount-line-est">目安 ${item.byWeight ? "約 " : ""}${est.toLocaleString()}円</div>
+                    </div>
+                    <div class="amount-line-input-wrap">
+                        <input type="number"
+                               class="amount-line-input"
+                               min="0" max="999999" step="1"
+                               value="${adj ? act : ''}"
+                               placeholder="${est}"
+                               data-order="${orderNumber}" data-item="${item.id}"
+                               inputmode="numeric">
+                        <span class="amount-line-unit">円</span>
+                    </div>
+                    ${adj ? `
+                        <button class="amount-line-reset" data-act="reset"
+                                data-order="${orderNumber}" data-item="${item.id}"
+                                title="もとに戻す">↺</button>
+                        <div class="amount-line-diff ${diff >= 0 ? 'plus' : 'minus'}">
+                            ${diff >= 0 ? '+' : ''}${diff.toLocaleString()}
+                        </div>
+                    ` : `
+                        <button class="amount-line-reset amount-line-reset-disabled" disabled>↺</button>
+                        <div class="amount-line-diff amount-line-diff-empty">―</div>
+                    `}
+                </div>
+            `;
+        }
+
+        function wireAmountEvents() {
+            document.querySelectorAll(".amount-line-input").forEach(input => {
+                const commit = () => {
+                    const orderNumber = parseInt(input.dataset.order, 10);
+                    const itemId      = parseInt(input.dataset.item, 10);
+                    const raw = input.value.trim();
+                    const orders = meitoLoadOrders();
+                    const order = orders.find(o => o.number === orderNumber);
+                    if (!order) return;
+                    const item = order.items.find(i => i.id === itemId);
+                    if (!item) return;
+
+                    if (raw === "") {
+                        // 空欄なら調整解除
+                        if (meitoIsAdjusted(item)) {
+                            delete item.actualTotal;
+                            order.total = meitoGetOrderTotal(order);
+                            meitoWriteOrders(orders);
+                            renderAmounts();
+                        }
+                        return;
+                    }
+                    const val = parseInt(raw, 10);
+                    if (isNaN(val) || val < 0) {
+                        input.classList.add("input-shake");
+                        setTimeout(() => input.classList.remove("input-shake"), 400);
+                        return;
+                    }
+                    // 目安と同じなら調整解除
+                    if (val === item.price * item.qty) {
+                        if (meitoIsAdjusted(item)) {
+                            delete item.actualTotal;
+                            order.total = meitoGetOrderTotal(order);
+                            meitoWriteOrders(orders);
+                            renderAmounts();
+                        }
+                        return;
+                    }
+                    item.actualTotal = val;
+                    order.total = meitoGetOrderTotal(order);
+                    meitoWriteOrders(orders);
+                    renderAmounts();
+                };
+                input.addEventListener("blur", commit);
+                input.addEventListener("keydown", e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        input.blur();
+                    }
+                });
+                input.addEventListener("focus", () => setTimeout(() => input.select(), 0));
+            });
+
+            document.querySelectorAll("[data-act='reset']").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const orderNumber = parseInt(btn.dataset.order, 10);
+                    const itemId      = parseInt(btn.dataset.item, 10);
+                    const orders = meitoLoadOrders();
+                    const order = orders.find(o => o.number === orderNumber);
+                    if (!order) return;
+                    const item = order.items.find(i => i.id === itemId);
+                    if (!item) return;
+                    delete item.actualTotal;
+                    order.total = meitoGetOrderTotal(order);
+                    meitoWriteOrders(orders);
+                    renderAmounts();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日報を本部へ送る - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-body">
+
+    <div id="staffHeaderMount"></div>
+
+    <main class="staff-main staff-doc">
+        <div class="staff-doc-titlebar">
+            <h2 class="staff-doc-title">📧 日報を本部へ送る</h2>
+            <div class="staff-doc-meta" id="docMeta"></div>
+        </div>
+
+        <p class="staff-doc-lead">
+            必要事項を入力して「送信する」を押すと、<br>
+            メールアプリが立ち上がり、本部に送信できます。
+        </p>
+
+        <form class="report-form" id="reportForm">
+            <div class="report-field">
+                <label class="report-label">本部メールアドレス</label>
+                <input type="email" class="report-input" id="reportTo"
+                       value="honbu@kaimonokun.example" required>
+            </div>
+
+            <div class="report-row">
+                <div class="report-field">
+                    <label class="report-label">メートくん ID</label>
+                    <input type="text" class="report-input" id="reportUser" readonly>
+                </div>
+                <div class="report-field">
+                    <label class="report-label">地区</label>
+                    <input type="text" class="report-input" id="reportRegion" readonly>
+                </div>
+                <div class="report-field">
+                    <label class="report-label">日付</label>
+                    <input type="date" class="report-input" id="reportDate" required>
+                </div>
+            </div>
+
+            <div class="report-stats" id="reportStats"></div>
+
+            <div class="report-field">
+                <label class="report-label">注文件数</label>
+                <input type="number" class="report-input" id="reportCount" min="0" required>
+            </div>
+
+            <div class="report-field">
+                <label class="report-label">メモ・気付き（自由記入）</label>
+                <textarea class="report-textarea" id="reportMemo" rows="6"
+                          placeholder="例：肉じゃがセットが人気でした。あじの干物が品切れ気味。"></textarea>
+            </div>
+
+            <div class="report-actions">
+                <button type="button" class="report-preview-btn" id="reportPreview">
+                    👁 内容を確認
+                </button>
+                <button type="submit" class="report-submit">
+                    <span>📧</span><span>送信する（メールアプリが開きます）</span>
+                </button>
+            </div>
+
+            <pre class="report-preview" id="reportPreviewBox" hidden></pre>
+        </form>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="meito-common.js"></script>
+    <script>
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else {
+            document.addEventListener("DOMContentLoaded", async () => {
+                try { await dataReady; } catch { return; }
+                document.getElementById("staffHeaderMount").innerHTML =
+                    meitoRenderHeader("日報");
+                document.getElementById("docMeta").innerHTML =
+                    `<span>📅 ${meitoFormatToday()}</span>` +
+                    `<span class="staff-doc-meta-sep">・</span>` +
+                    `<span>📍 ${getRegionName(getCurrentRegion())}</span>`;
+
+                const auth = getAuth();
+                document.getElementById("reportUser").value   = `${auth.name}（${auth.id}）`;
+                document.getElementById("reportRegion").value = getRegionName(getCurrentRegion());
+
+                // 日付：本日
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}-${meitoPad2(now.getMonth()+1)}-${meitoPad2(now.getDate())}`;
+                document.getElementById("reportDate").value = dateStr;
+
+                // 統計（本日の注文件数・合計金額）
+                const orders = meitoLoadOrders();
+                const totalAmt = orders.reduce((s, o) => s + meitoGetOrderTotal(o), 0);
+                document.getElementById("reportCount").value = orders.length;
+                document.getElementById("reportStats").innerHTML = `
+                    <div class="report-stat">
+                        <span class="report-stat-label">本日の注文件数</span>
+                        <span class="report-stat-value">${orders.length} 件</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">本日の合計金額</span>
+                        <span class="report-stat-value">${totalAmt.toLocaleString()}円</span>
+                    </div>
+                `;
+
+                document.getElementById("reportPreview").addEventListener("click", () => {
+                    document.getElementById("reportPreviewBox").textContent = buildReportBody();
+                    document.getElementById("reportPreviewBox").hidden = false;
+                });
+
+                document.getElementById("reportForm").addEventListener("submit", e => {
+                    e.preventDefault();
+                    const to = document.getElementById("reportTo").value.trim();
+                    if (!to) return;
+                    const subject = `【買い物くん 日報】${document.getElementById("reportDate").value} ${getRegionName(getCurrentRegion())}`;
+                    const body    = buildReportBody();
+                    const mailto  = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    location.href = mailto;
+                });
+            });
+        }
+
+        function buildReportBody() {
+            const auth = getAuth();
+            const region = getRegionName(getCurrentRegion());
+            const orders = meitoLoadOrders();
+            const totalAmt = orders.reduce((s, o) => s + meitoGetOrderTotal(o), 0);
+            const date = document.getElementById("reportDate").value;
+            const count = document.getElementById("reportCount").value;
+            const memo = document.getElementById("reportMemo").value;
+
+            // 注文番号と合計だけのサマリ
+            const ordersList = orders
+                .slice().sort((a, b) => a.number - b.number)
+                .map(o => `  ${o.number}番：${meitoGetOrderTotal(o).toLocaleString()}円（${o.items.length}品目）`)
+                .join("\n");
+
+            return [
+                `■ 買い物くん 日報`,
+                ``,
+                `日付：${date}`,
+                `地区：${region}`,
+                `担当：${auth.name}（${auth.id}）`,
+                ``,
+                `■ 集計`,
+                `注文件数：${count} 件`,
+                `合計金額：${totalAmt.toLocaleString()}円`,
+                ``,
+                `■ 注文一覧`,
+                ordersList || `  （本日の注文なし）`,
+                ``,
+                `■ メモ`,
+                memo || `（なし）`,
+                ``,
+                `--`,
+                `買い物くん（自動生成）`
+            ].join("\n");
+        }
+    </script>
+</body>
+</html>

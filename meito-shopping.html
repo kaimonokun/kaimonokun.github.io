@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買い出し指示書 - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-body">
+
+    <div id="staffHeaderMount"></div>
+
+    <main class="staff-main staff-doc">
+        <div class="staff-doc-titlebar">
+            <h2 class="staff-doc-title">📝 買い出し指示書</h2>
+            <div class="staff-doc-meta" id="docMeta"></div>
+            <div class="staff-doc-actions">
+                <button class="staff-action-btn" id="printBtn">
+                    🖨 印刷する
+                </button>
+            </div>
+        </div>
+
+        <div class="staff-doc-empty" id="emptyView" hidden>
+            <div class="staff-doc-empty-icon">📋</div>
+            <div>本日まだ注文が入っていません</div>
+        </div>
+
+        <div class="staff-doc-summary" id="summaryBox" hidden></div>
+
+        <div class="staff-doc-list" id="shoppingList"></div>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="meito-common.js"></script>
+    <script>
+        if (!requireAuth("meito")) { /* リダイレクト中 */ }
+        else {
+            document.addEventListener("DOMContentLoaded", async () => {
+                try { await dataReady; } catch { return; }
+                document.getElementById("staffHeaderMount").innerHTML =
+                    meitoRenderHeader("買い出し指示書");
+                document.getElementById("docMeta").innerHTML =
+                    `<span>📅 ${meitoFormatToday()}</span>` +
+                    `<span class="staff-doc-meta-sep">・</span>` +
+                    `<span>📍 ${getRegionName(getCurrentRegion())}</span>`;
+                renderShoppingList();
+                document.getElementById("printBtn").addEventListener("click", () => window.print());
+            });
+        }
+
+        function renderShoppingList() {
+            const orders = meitoLoadOrders();
+            const container = document.getElementById("shoppingList");
+            const emptyView = document.getElementById("emptyView");
+            const summary   = document.getElementById("summaryBox");
+
+            if (orders.length === 0) {
+                emptyView.hidden = false;
+                summary.hidden = true;
+                container.innerHTML = "";
+                return;
+            }
+            emptyView.hidden = true;
+
+            // 商品IDごとに集計
+            const byProduct = new Map();
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    if (!byProduct.has(item.id)) {
+                        byProduct.set(item.id, {
+                            id: item.id,
+                            name: item.name,
+                            emoji: item.emoji,
+                            unit: item.unit,
+                            price: item.price,
+                            byWeight: !!item.byWeight,
+                            qty: 0,
+                            buyers: []
+                        });
+                    }
+                    const rec = byProduct.get(item.id);
+                    rec.qty += item.qty;
+                    rec.buyers.push({ number: order.number, qty: item.qty });
+                });
+            });
+
+            // カテゴリ→数量多い順
+            const productsList = Array.from(byProduct.values()).sort((a, b) => {
+                const pa = getProduct(a.id);
+                const pb = getProduct(b.id);
+                const ca = pa ? pa.category : "";
+                const cb = pb ? pb.category : "";
+                if (ca !== cb) return ca.localeCompare(cb);
+                return b.qty - a.qty || a.name.localeCompare(b.name, "ja");
+            });
+
+            // サマリ
+            const totalItems = productsList.reduce((s, p) => s + p.qty, 0);
+            const totalOrders = orders.length;
+            summary.hidden = false;
+            summary.innerHTML = `
+                <div class="staff-doc-summary-item">
+                    <span class="staff-doc-summary-label">注文件数</span>
+                    <span class="staff-doc-summary-value">${totalOrders} 件</span>
+                </div>
+                <div class="staff-doc-summary-item">
+                    <span class="staff-doc-summary-label">商品種類</span>
+                    <span class="staff-doc-summary-value">${productsList.length} 種</span>
+                </div>
+                <div class="staff-doc-summary-item">
+                    <span class="staff-doc-summary-label">合計個数</span>
+                    <span class="staff-doc-summary-value">${totalItems} 個</span>
+                </div>
+            `;
+
+            // カテゴリごとにグルーピングして表示
+            let currentCat = null;
+            const html = productsList.map(p => {
+                const prod = getProduct(p.id);
+                const catId = prod ? prod.category : "other";
+                const catName = (categories.find(c => c.id === catId) || { name: "その他" }).name;
+                let header = "";
+                if (catId !== currentCat) {
+                    currentCat = catId;
+                    header = `<div class="shopping-cat-header">${catName}</div>`;
+                }
+
+                // 量り売り商品はおおよその総グラム数も計算（unitGramsが拾えれば）
+                let weightHint = "";
+                if (p.byWeight) {
+                    const m = /^(\d+)\s*g$/.exec(String(p.unit || "").trim());
+                    if (m) {
+                        const ug = parseInt(m[1], 10);
+                        const totalG = ug * p.qty;
+                        weightHint = `（おおよそ <b>${totalG}g</b>）`;
+                    }
+                }
+
+                const buyersHtml = p.buyers
+                    .sort((a, b) => a.number - b.number)
+                    .map(b => `<span class="shopping-buyer">${b.number}番（${b.qty}個）</span>`)
+                    .join("");
+
+                return `
+                    ${header}
+                    <div class="shopping-row">
+                        <div class="shopping-row-check"><input type="checkbox" class="shopping-check"></div>
+                        <div class="shopping-row-emoji">${p.emoji}</div>
+                        <div class="shopping-row-info">
+                            <div class="shopping-row-name">
+                                ${p.byWeight ? '<span class="bw-badge">量り売り</span>' : ''}
+                                ${meitoEscapeHtml(p.name)}
+                            </div>
+                            <div class="shopping-row-sub">
+                                <span class="shopping-row-unit">1点 = ${meitoEscapeHtml(p.unit)}</span>
+                                <span class="shopping-row-price">目安単価 ${p.byWeight ? "約 " : ""}${p.price.toLocaleString()}円</span>
+                            </div>
+                            <div class="shopping-row-buyers">${buyersHtml}</div>
+                        </div>
+                        <div class="shopping-row-qty">
+                            <div class="shopping-row-qty-big">× ${p.qty}</div>
+                            ${weightHint ? `<div class="shopping-row-qty-hint">${weightHint}</div>` : ""}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

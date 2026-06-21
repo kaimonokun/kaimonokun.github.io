@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>担当地区を選ぶ - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+    <div class="login-wrap">
+        <div class="login-card region-select-card">
+            <div class="login-logo">今日の担当地区を選んでください</div>
+            <div class="login-sub" id="regionSelectUser"></div>
+
+            <div class="region-select-list" id="regionSelectList"></div>
+
+            <div class="region-select-foot">
+                <button class="region-select-logout" id="regionSelectLogout">
+                    ⎋ ログアウト
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const auth = getAuth();
+            if (!auth) {
+                location.replace("login.html");
+                return;
+            }
+
+            document.getElementById("regionSelectUser").textContent =
+                `${auth.name}（${ROLE_LABELS[auth.role] || auth.role}）`;
+
+            const list = document.getElementById("regionSelectList");
+            const myRegions = auth.regions && auth.regions.length
+                ? AVAILABLE_REGIONS.filter(r => auth.regions.includes(r.id))
+                : AVAILABLE_REGIONS;
+
+            list.innerHTML = myRegions.map(r => `
+                <button class="region-select-item" data-region="${r.id}">
+                    <span class="region-select-item-icon">📍</span>
+                    <span class="region-select-item-name">${r.name}</span>
+                    <span class="region-select-item-arrow">▶</span>
+                </button>
+            `).join("");
+
+            list.querySelectorAll(".region-select-item").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const r = btn.dataset.region;
+                    setAssignedRegion(r);
+                    // role に応じた画面へ
+                    if (auth.role === "headquarters") location.href = "hq.html";
+                    else if (auth.role === "meito") location.href = "meito.html";
+                    else location.href = "index.html";
+                });
+            });
+
+            document.getElementById("regionSelectLogout").addEventListener("click", () => {
+                if (window.confirm("ログアウトしますか？")) logout();
+            });
+        });
+    </script>
+</body>
+</html>

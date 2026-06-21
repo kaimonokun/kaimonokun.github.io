@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本部画面 - 買い物くん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-body">
+
+    <header class="staff-header">
+        <div class="staff-header-inner">
+            <div class="staff-header-left">
+                <h1 class="staff-logo">買い物くん <span class="staff-logo-role staff-logo-role-hq">本部</span></h1>
+                <div class="staff-context" id="staffContext"></div>
+            </div>
+            <div class="staff-header-right">
+                <a href="select-region.html" class="staff-link-btn">📍 地区切替</a>
+                <button class="staff-link-btn staff-logout-btn" id="staffLogout">⎋ ログアウト</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="staff-main">
+        <h2 class="staff-section-title">本部 管理メニュー</h2>
+
+        <div class="hq-region-stats" id="hqRegionStats"></div>
+
+        <div class="staff-menu-grid">
+            <a href="meito-shopping.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">📝</div>
+                <div class="staff-menu-card-title">買い出し指示書</div>
+                <div class="staff-menu-card-desc">現在地区の注文を商品別に確認</div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+            <a href="meito-amounts.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">💴</div>
+                <div class="staff-menu-card-title">実際の金額入力</div>
+                <div class="staff-menu-card-desc">注文の金額を1品ずつ調整</div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+            <a href="meito-delivery.html" class="staff-menu-card">
+                <div class="staff-menu-card-icon">🧾</div>
+                <div class="staff-menu-card-title">納品書生成</div>
+                <div class="staff-menu-card-desc">お客様番号ごとに印刷</div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+            <a href="index.html" class="staff-menu-card staff-menu-card-secondary">
+                <div class="staff-menu-card-icon">🛒</div>
+                <div class="staff-menu-card-title">お客様画面を見る</div>
+                <div class="staff-menu-card-desc">実際の表示確認・価格設定</div>
+                <div class="staff-menu-card-arrow">▶</div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="staff-footer">
+        <span>買い物くん 本部用画面</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        if (!requireAuth("headquarters")) { /* リダイレクト */ }
+        else {
+            document.addEventListener("DOMContentLoaded", async () => {
+                try { await dataReady; } catch { return; }
+                const auth = getAuth();
+                document.getElementById("staffContext").innerHTML =
+                    `<span class="staff-ctx-user">${auth.name}</span>` +
+                    `<span class="staff-ctx-sep">・</span>` +
+                    `<span class="staff-ctx-region">📍 ${getRegionName(getCurrentRegion())}</span>`;
+
+                // 全地区のサマリ
+                const statsEl = document.getElementById("hqRegionStats");
+                const cards = AVAILABLE_REGIONS.map(r => {
+                    let orders = [];
+                    try { orders = JSON.parse(localStorage.getItem(`buyimono_orders_${r.id}`) || "[]"); }
+                    catch {}
+                    const total = orders.reduce((s, o) => {
+                        return s + o.items.reduce((ss, it) =>
+                            ss + (it.actualTotal != null ? it.actualTotal : it.price * it.qty), 0);
+                    }, 0);
+                    return `
+                        <div class="hq-stat-card">
+                            <div class="hq-stat-card-name">📍 ${r.name}</div>
+                            <div class="hq-stat-card-orders">注文 <b>${orders.length}</b> 件</div>
+                            <div class="hq-stat-card-amount">合計 <b>${total.toLocaleString()}円</b></div>
+                        </div>
+                    `;
+                }).join("");
+                statsEl.innerHTML = cards;
+
+                document.getElementById("staffLogout").addEventListener("click", () => {
+                    if (window.confirm("ログアウトしますか？")) logout();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

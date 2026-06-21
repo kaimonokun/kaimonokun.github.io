@@ -1,0 +1,33 @@
+[
+    { "id": 1,  "name": "にんじん",          "emoji": "🥕", "price": 128,  "unit": "1本",     "category": "vegetable",                         "desc": "新鮮な国産にんじん。甘みがあって煮物・サラダに最適です。" },
+    { "id": 2,  "name": "じゃがいも",        "emoji": "🥔", "price": 198,  "unit": "3個入",   "category": "vegetable",                         "desc": "ほくほくの男爵いも。カレーや肉じゃがにぴったり。" },
+    { "id": 3,  "name": "玉ねぎ",            "emoji": "🧅", "price": 158,  "unit": "2個入",   "category": "vegetable",                         "desc": "辛味が少なく、甘みのある玉ねぎ。" },
+    { "id": 4,  "name": "キャベツ",          "emoji": "🥬", "price": 248,  "unit": "1玉",     "category": "vegetable",                         "desc": "葉がやわらかく、サラダでも炒め物でも美味しい。" },
+    { "id": 5,  "name": "トマト",            "emoji": "🍅", "price": 298,  "unit": "3個入",   "category": "vegetable",                         "desc": "完熟トマト。甘みと酸味のバランスが絶妙です。" },
+    { "id": 6,  "name": "きゅうり",          "emoji": "🥒", "price": 128,  "unit": "3本入",   "category": "vegetable",                         "desc": "みずみずしい新鮮きゅうり。" },
+
+    { "id": 10, "name": "豚こま切れ",        "emoji": "🥩", "price": 398,  "unit": "200g",    "category": "meat",     "byWeight": true,        "desc": "国産豚の切り落とし。炒め物・煮物に便利。" },
+    { "id": 11, "name": "鶏むね肉",          "emoji": "🍗", "price": 348,  "unit": "300g",    "category": "meat",     "byWeight": true,        "desc": "ヘルシーな鶏むね肉。低脂肪・高たんぱく。" },
+    { "id": 12, "name": "牛ひき肉",          "emoji": "🥩", "price": 498,  "unit": "200g",    "category": "meat",     "byWeight": true,        "desc": "ハンバーグ・そぼろに。脂身の少ない赤身。" },
+
+    { "id": 20, "name": "焼き鮭",            "emoji": "🐟", "price": 298,  "unit": "2切れ",   "category": "fish",     "byWeight": true,        "desc": "朝食にぴったりの塩鮭。手軽に焼くだけ。" },
+    { "id": 21, "name": "あじの干物",        "emoji": "🐟", "price": 398,  "unit": "2枚",     "category": "fish",     "byWeight": true,        "desc": "脂のりが良い国産あじ。" },
+    { "id": 22, "name": "いわし缶",          "emoji": "🥫", "price": 158,  "unit": "1缶",     "category": "fish",                              "desc": "保存が効いて便利。カルシウム豊富。" },
+
+    { "id": 30, "name": "トイレットペーパー", "emoji": "🧻", "price": 398,  "unit": "12ロール", "category": "daily",                            "desc": "やわらかい2枚重ね。普段使いに最適。" },
+    { "id": 31, "name": "ティッシュペーパー", "emoji": "📦", "price": 298,  "unit": "5箱",    "category": "daily",                              "desc": "肌にやさしいティッシュ。お得な5箱セット。" },
+    { "id": 32, "name": "台所洗剤",          "emoji": "🧴", "price": 248,  "unit": "1本",     "category": "daily",                             "desc": "油汚れに強い、さわやかな香りの洗剤。" },
+    { "id": 33, "name": "洗濯洗剤",          "emoji": "🧺", "price": 498,  "unit": "1袋",     "category": "daily",                             "desc": "しっかり汚れ落とし。" },
+
+    { "id": 40, "name": "醤油",              "emoji": "🍶", "price": 298,  "unit": "1L",      "category": "seasoning",                         "desc": "毎日使える定番の醤油。" },
+    { "id": 41, "name": "味噌",              "emoji": "🥣", "price": 398,  "unit": "750g",    "category": "seasoning",                         "desc": "コクのある合わせ味噌。" },
+    { "id": 42, "name": "サラダ油",          "emoji": "🫒", "price": 348,  "unit": "900g",    "category": "seasoning",                         "desc": "揚げ物・炒め物に。" },
+    { "id": 43, "name": "お米",              "emoji": "🍚", "price": 1980, "unit": "5kg",     "category": "seasoning",                         "desc": "新米。つやつやで甘みのある国産米。" },
+    { "id": 50, "name": "カレールー",        "emoji": "🍛", "price": 198,  "unit": "1箱",     "category": "seasoning",                         "desc": "中辛。子どもから大人まで楽しめる本格カレー。" },
+    { "id": 51, "name": "パン粉",            "emoji": "🍞", "price": 158,  "unit": "1袋",     "category": "seasoning",                         "desc": "ふんわり衣・ハンバーグのつなぎに。" },
+
+    { "id": 60, "name": "牛乳",              "emoji": "🥛", "price": 238,  "unit": "1L",      "category": "other",                             "desc": "新鮮な生乳使用。料理にも飲用にも。" },
+    { "id": 61, "name": "たまご",            "emoji": "🥚", "price": 248,  "unit": "10個入",  "category": "other",                             "desc": "新鮮な赤玉たまご。朝食や料理に。" },
+    { "id": 62, "name": "食パン",            "emoji": "🍞", "price": 148,  "unit": "1斤",     "category": "other",                             "desc": "しっとりやわらかい食パン。朝食に。" },
+    { "id": 63, "name": "豆腐",              "emoji": "⬜", "price": 98,   "unit": "1丁",     "category": "other",                             "desc": "絹ごし豆腐。冷奴・味噌汁に。" }
+]
