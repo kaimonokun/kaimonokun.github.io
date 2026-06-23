@@ -47,7 +47,14 @@
             const a = getAuth();
             if (a) {
                 if (a.role === "headquarters") location.replace("hq.html");
-                else if (a.role === "meito") location.replace("meito.html");
+                else if (a.role === "meito") {
+                    // 複数地区で未選択なら選択画面、それ以外はメートくん画面
+                    if (!getAssignedRegion() && a.regions && a.regions.length >= 2) {
+                        location.replace("select-region.html");
+                    } else {
+                        location.replace("meito.html");
+                    }
+                }
                 return;
             }
 
@@ -70,14 +77,18 @@
                     pwEl.select();
                     return;
                 }
-                // ログイン成功 → 担当地区（本部がアカウントに指定）を自動セットしてから遷移
+                // ログイン成功 → 担当地区の決め方で振り分け
                 const u = result.user;
-                if (u.regions && u.regions.length > 0) {
-                    setAssignedRegion(u.regions[0]);
-                }
                 if (u.role === "headquarters") {
+                    // 本部は全地区を管理。最初の地区をセットして本部画面へ（本部画面内で切替可）
+                    if (u.regions && u.regions.length > 0) setAssignedRegion(u.regions[0]);
                     location.href = "hq.html";
+                } else if (u.regions && u.regions.length >= 2) {
+                    // 複数地区を許可されたメートくんは、その日の担当地区を選ぶ
+                    location.href = "select-region.html";
                 } else {
+                    // 単一地区のメートくんは固定（選択画面なし）
+                    if (u.regions && u.regions.length === 1) setAssignedRegion(u.regions[0]);
                     location.href = "meito.html";
                 }
             });

@@ -15,6 +15,7 @@
                 <div class="staff-context" id="staffContext"></div>
             </div>
             <div class="staff-header-right">
+                <a href="select-region.html" class="staff-link-btn" id="staffRegionSwitch" hidden>📍 地区切替</a>
                 <button class="staff-link-btn staff-logout-btn" id="staffLogout">⎋ ログアウト</button>
             </div>
         </div>
@@ -93,6 +94,11 @@
                     `<span class="staff-ctx-user">${auth.name}</span>` +
                     `<span class="staff-ctx-sep">・</span>` +
                     `<span class="staff-ctx-region">📍 ${getRegionName(region)}</span>`;
+
+                // 複数地区を許可されたメートくんだけ「地区切替」ボタンを表示
+                if (auth.regions && auth.regions.length >= 2) {
+                    document.getElementById("staffRegionSwitch").hidden = false;
+                }
 
                 document.getElementById("staffLogout").addEventListener("click", () => {
                     if (window.confirm("ログアウトしますか？")) logout();
